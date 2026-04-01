@@ -101,6 +101,6 @@ cd frontend
 make frontend-build
 ```
 
-## Demo Pitch (for judges)
+## Demo Pitch 
 
 "OmniStream AI is not just a recommender system. It is a cross-platform content decision assistant that uses context, vibe, and behavioral memory to generate explainable, cross-domain content bundles in real time."
