@@ -103,6 +103,18 @@ class ResumeResponse(BaseModel):
     items: list[ResumeItem]
 
 
+class DailyFeedSlot(BaseModel):
+    slot: str
+    vibe: str
+    items: list[RecommendationCard]
+
+
+class DailyFeedResponse(BaseModel):
+    user_id: str
+    generated_at: datetime
+    slots: list[DailyFeedSlot]
+
+
 class RabbitHoleResponse(BaseModel):
     seed: RecommendationCard
     journey: list[RecommendationCard]

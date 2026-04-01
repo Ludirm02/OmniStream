@@ -16,6 +16,8 @@ from app.schemas.contracts import (
     BundleCard,
     ContentCard,
     ContextSummary,
+    DailyFeedResponse,
+    DailyFeedSlot,
     RabbitHoleResponse,
     RecommendationCard,
     RecommendationRequest,
@@ -139,6 +141,37 @@ class RecommenderService:
         )
 
         return RabbitHoleResponse(seed=seed_card, journey=journey)
+
+    def daily_feed(self, user_id: str, device: str = "mobile") -> DailyFeedResponse:
+        now = datetime.now(UTC)
+        plan = [
+            ("morning", "learn", 20),
+            ("midday", "focus", 35),
+            ("evening", "explore", 25),
+            ("night", "late_night", 30),
+        ]
+
+        slots: list[DailyFeedSlot] = []
+        for slot_name, vibe, minutes in plan:
+            result = self.recommend(
+                RecommendationRequest(
+                    user_id=user_id,
+                    vibe=vibe,  # type: ignore[arg-type]
+                    device=device,  # type: ignore[arg-type]
+                    session_minutes=minutes,
+                    local_timestamp=now,
+                    limit=4,
+                )
+            )
+            slots.append(
+                DailyFeedSlot(
+                    slot=slot_name,
+                    vibe=vibe,
+                    items=result.recommendations[:3],
+                )
+            )
+
+        return DailyFeedResponse(user_id=user_id, generated_at=now, slots=slots)
 
     def resume(self, user_id: str) -> ResumeResponse:
         rows = self.db.execute(

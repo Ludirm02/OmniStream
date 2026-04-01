@@ -13,6 +13,7 @@ from app.engine.recommender import RecommenderService
 from app.models import Content, Interaction, User
 from app.schemas.contracts import (
     ContentCard,
+    DailyFeedResponse,
     InteractionRequest,
     RabbitHoleResponse,
     RecommendationRequest,
@@ -108,6 +109,18 @@ def get_resume(user_id: str, request: Request, db: Session = Depends(get_db)) ->
     if db.get(User, user_id) is None:
         raise HTTPException(status_code=404, detail="User not found")
     return _service(db, request).resume(user_id)
+
+
+@router.get("/daily-feed/{user_id}", response_model=DailyFeedResponse)
+def get_daily_feed(
+    user_id: str,
+    request: Request,
+    device: str = "mobile",
+    db: Session = Depends(get_db),
+) -> DailyFeedResponse:
+    if db.get(User, user_id) is None:
+        raise HTTPException(status_code=404, detail="User not found")
+    return _service(db, request).daily_feed(user_id=user_id, device=device)
 
 
 @router.get("/rabbit-hole/{content_id}", response_model=RabbitHoleResponse)

@@ -68,6 +68,18 @@ export interface ResumeResponse {
   items: ResumeItem[];
 }
 
+export interface DailyFeedSlot {
+  slot: string;
+  vibe: string;
+  items: RecommendationCard[];
+}
+
+export interface DailyFeedResponse {
+  user_id: string;
+  generated_at: string;
+  slots: DailyFeedSlot[];
+}
+
 export interface RabbitHoleResponse {
   seed: RecommendationCard;
   journey: RecommendationCard[];

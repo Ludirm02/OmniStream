@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 
 import {
   bootstrapUser,
+  getDailyFeed,
   getRabbitHole,
   getRecommendations,
   getResume,
@@ -11,6 +12,7 @@ import {
   logInteraction,
 } from "@/lib/api";
 import {
+  DailyFeedResponse,
   RabbitHoleResponse,
   RecommendationCard,
   RecommendationResponse,
@@ -48,6 +50,7 @@ export default function Home() {
 
   const [recommendation, setRecommendation] = useState<RecommendationResponse | null>(null);
   const [resume, setResume] = useState<ResumeResponse | null>(null);
+  const [dailyFeed, setDailyFeed] = useState<DailyFeedResponse | null>(null);
   const [rabbitHole, setRabbitHole] = useState<RabbitHoleResponse | null>(null);
 
   const [loading, setLoading] = useState(false);
@@ -69,7 +72,7 @@ export default function Home() {
     setLoading(true);
     setError("");
     try {
-      const [recData, resumeData] = await Promise.all([
+      const [recData, resumeData, dailyData] = await Promise.all([
         getRecommendations({
           user_id: userId,
           vibe,
@@ -78,10 +81,12 @@ export default function Home() {
           limit: 16,
         }),
         getResume(userId),
+        getDailyFeed(userId, device),
       ]);
 
       setRecommendation(recData);
       setResume(resumeData);
+      setDailyFeed(dailyData);
     } catch (err) {
       const message = err instanceof Error ? err.message : "Could not load recommendations.";
       setError(message);
@@ -338,6 +343,9 @@ export default function Home() {
                 <div key={item.content.id} className="rounded-xl border border-slate-200 bg-white p-3">
                   <p className="text-sm font-semibold">{item.content.title}</p>
                   <p className="text-xs text-slate-600">{Math.round(item.completion_ratio * 100)}% completed</p>
+                  <p className="text-xs text-slate-500">
+                    ~{Math.max(1, Math.round(item.content.duration_minutes * (1 - item.completion_ratio)))} min left
+                  </p>
                 </div>
               ))}
               {!resume?.items.length ? <p className="text-sm text-slate-600">No resume items yet.</p> : null}
@@ -360,6 +368,28 @@ export default function Home() {
               <ul className="mt-3 space-y-1 text-sm text-slate-700">
                 {bundle.items.map((item) => (
                   <li key={item.id}>
+                    <span className="font-semibold">{item.domain}:</span> {item.title}
+                  </li>
+                ))}
+              </ul>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <section className="soft-card rounded-3xl p-5">
+        <h2 className="text-xl font-bold">Daily Feed</h2>
+        <p className="mt-1 text-sm text-slate-600">
+          A full-day plan generated across vibes and domains, so users know what to consume at each moment.
+        </p>
+        <div className="mt-4 grid gap-3 md:grid-cols-2 lg:grid-cols-4">
+          {(dailyFeed?.slots || []).map((slot) => (
+            <article key={slot.slot} className="rounded-2xl border border-slate-200 bg-white p-4">
+              <p className="text-xs uppercase tracking-wide text-slate-500">{slot.slot}</p>
+              <p className="mt-1 text-sm font-semibold capitalize">{slot.vibe.replace("_", " ")}</p>
+              <ul className="mt-2 space-y-1 text-xs text-slate-700">
+                {slot.items.map((item) => (
+                  <li key={item.id} className="line-clamp-2">
                     <span className="font-semibold">{item.domain}:</span> {item.title}
                   </li>
                 ))}

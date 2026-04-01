@@ -1,4 +1,5 @@
 import {
+  DailyFeedResponse,
   RabbitHoleResponse,
   RecommendationResponse,
   ResumeResponse,
@@ -60,6 +61,11 @@ export function logInteraction(payload: {
 
 export function getResume(userId: string) {
   return request<ResumeResponse>(`/api/resume/${userId}`);
+}
+
+export function getDailyFeed(userId: string, device: string) {
+  const params = new URLSearchParams({ device });
+  return request<DailyFeedResponse>(`/api/daily-feed/${userId}?${params.toString()}`);
 }
 
 export function getRabbitHole(contentId: string, userId: string, vibe: string) {
